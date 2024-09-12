@@ -17,7 +17,7 @@ type User = {
 const EditableTable = () => {  
   const [users, setUsers] = useState<User[]>([]);  
   const [newUser, setNewUser] = useState<User | null>(null);  
-  const [editingUser, setEditingUser] = useState<User | null>(null);  
+  const [sortConfig, setSortConfig] = useState({ key: 'firstName', direction: 'ascending' });  
 
   useEffect(() => {  
     const fetchUsers = async () => {  
@@ -51,6 +51,31 @@ const EditableTable = () => {
     setNewUser(null);  
   };  
 
+  const requestSort = (key) => {  
+    let direction = 'ascending';  
+    if (sortConfig.key === key && sortConfig.direction === 'ascending') {  
+      direction = 'descending';  
+    }  
+    setSortConfig({ key, direction });  
+  };  
+
+  const getSortIcon = (key) => {  
+    if (sortConfig.key === key) {  
+      return sortConfig.direction === 'ascending' ? '↑' : '↓';  
+    }  
+    return '';  
+  };  
+
+  const sortedUsers = [...users].sort((a, b) => {  
+    if (a[sortConfig.key] < b[sortConfig.key]) {  
+      return sortConfig.direction === 'ascending' ? -1 : 1;  
+    }  
+    if (a[sortConfig.key] > b[sortConfig.key]) {  
+      return sortConfig.direction === 'ascending' ? 1 : -1;  
+    }  
+    return 0;  
+  });  
+
   return (  
     <div>  
       <div className="table-controls">  
@@ -67,11 +92,21 @@ const EditableTable = () => {
       <table>  
         <thead>  
           <tr>  
-            <th>First Name</th>  
-            <th>Last Name</th>  
-            <th>Position</th>  
-            <th>Phone</th>  
-            <th>Email</th>  
+            <th onClick={() => requestSort('firstName')}>  
+              First Name {getSortIcon('firstName')}  
+            </th>  
+            <th onClick={() => requestSort('lastName')}>  
+              Last Name {getSortIcon('lastName')}  
+            </th>  
+            <th onClick={() => requestSort('position')}>  
+              Position {getSortIcon('position')}  
+            </th>  
+            <th onClick={() => requestSort('phone')}>  
+              Phone {getSortIcon('phone')}  
+            </th>  
+            <th onClick={() => requestSort('email')}>  
+              Email {getSortIcon('email')}  
+            </th>  
           </tr>  
         </thead>  
         <tbody>  
@@ -119,7 +154,7 @@ const EditableTable = () => {
               </td>  
             </tr>  
           )}  
-          {users.map(user => (  
+          {sortedUsers.map(user => (  
             <tr key={user.id}>  
               <td>{user.firstName}</td>  
               <td>{user.lastName}</td>  
